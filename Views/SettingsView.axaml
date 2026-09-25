@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:AchievementTracker.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+             x:Class="AchievementTracker.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel />
+    </Design.DataContext>
+
+    <StackPanel Margin="24" Spacing="12" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock Text="Steam Achievement Tracker Setup" FontSize="20" FontWeight="Bold" />
+
+        <TextBlock Text="Steam Web API Key" />
+        <TextBox Text="{Binding ApiKey}" PasswordChar="•" PlaceholderText="Paste your API key" />
+        <TextBlock Text="Get one at steamcommunity.com/dev/apikey" FontSize="11" Opacity="0.6" />
+
+        <TextBlock Text="Steam ID64 or Vanity Name" Margin="0,12,0,0" />
+        <TextBox Text="{Binding SteamIdOrVanity}" PlaceholderText="e.g. 76561198000000000 or your profile name" />
+
+        <Button Content="Save" Command="{Binding SaveCommand}" HorizontalAlignment="Left" Margin="0,12,0,0" />
+        <TextBlock Text="{Binding StatusMessage}" Foreground="Green" />
+    </StackPanel>
+
+</UserControl>
