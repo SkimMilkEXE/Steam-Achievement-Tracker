@@ -8,17 +8,18 @@ using AchievementTracker.Models;
 
 namespace AchievementTracker.Services;
 
-// v1: calls Steam directly using the user's own API key.
-public class DirectSteamDataProvider : ISteamDataProvider
+// v2: calls the developer's Cloudflare Worker, which holds the Steam key as a secret.
+// Users need no key of their own - the apiKey parameters on ISteamDataProvider are simply unused here.
+public class WorkerSteamDataProvider : ISteamDataProvider
 {
-    private static readonly HttpClient Client = new() { BaseAddress = new Uri("https://api.steampowered.com/") };
+    private static readonly HttpClient Client = new() { BaseAddress = new Uri("https://steam-tracker-api.richardhurley374.workers.dev/") };
 
     public async Task<string> ResolveSteamIdAsync(string steamIdOrVanity, string apiKey)
     {
         if (steamIdOrVanity.Length == 17 && steamIdOrVanity.All(char.IsDigit))
             return steamIdOrVanity;
 
-        var url = $"ISteamUser/ResolveVanityURL/v1/?key={apiKey}&format=json&vanityurl={Uri.EscapeDataString(steamIdOrVanity)}";
+        var url = $"resolve?vanityurl={Uri.EscapeDataString(steamIdOrVanity)}";
         var result = await Client.GetFromJsonAsync<ResolveVanityResponse>(url)
             ?? throw new InvalidOperationException("No response resolving your Steam ID.");
 
@@ -30,43 +31,42 @@ public class DirectSteamDataProvider : ISteamDataProvider
 
     public async Task<List<Game>> GetOwnedGamesAsync(string steamId, string apiKey)
     {
-        var url = $"IPlayerService/GetOwnedGames/v1/?key={apiKey}&format=json&steamid={steamId}&include_appinfo=1";
+        var url = $"owned-games?steamid={steamId}";
         var result = await Client.GetFromJsonAsync<OwnedGamesResponse>(url);
         return SteamAchievementMerger.ToGames(result);
     }
 
     public async Task<List<Achievement>> GetAchievementsAsync(int appId, string steamId, string apiKey)
     {
-        var schema = await GetSchemaAsync(appId, apiKey);
+        var schema = await GetSchemaAsync(appId);
         if (schema.Count == 0)
             return [];
 
-        var unlocked = await GetPlayerAchievementsAsync(appId, steamId, apiKey);
+        var unlocked = await GetPlayerAchievementsAsync(appId, steamId);
         var percentages = await GetGlobalPercentagesAsync(appId);
 
         return SteamAchievementMerger.Merge(schema, unlocked, percentages);
     }
 
-    private async Task<Dictionary<string, SchemaAchievementDto>> GetSchemaAsync(int appId, string apiKey)
+    private async Task<Dictionary<string, SchemaAchievementDto>> GetSchemaAsync(int appId)
     {
-        var url = $"ISteamUserStats/GetSchemaForGame/v2/?key={apiKey}&format=json&appid={appId}";
+        var url = $"schema?appid={appId}";
         var result = await Client.GetFromJsonAsync<SchemaResponse>(url);
         var achievements = result?.Game.AvailableGameStats?.Achievements ?? [];
         return achievements.ToDictionary(a => a.Name);
     }
 
-    private async Task<Dictionary<string, PlayerAchievementDto>> GetPlayerAchievementsAsync(int appId, string steamId, string apiKey)
+    private async Task<Dictionary<string, PlayerAchievementDto>> GetPlayerAchievementsAsync(int appId, string steamId)
     {
         try
         {
-            var url = $"ISteamUserStats/GetPlayerAchievements/v1/?key={apiKey}&format=json&steamid={steamId}&appid={appId}";
+            var url = $"achievements?steamid={steamId}&appid={appId}";
             var result = await Client.GetFromJsonAsync<PlayerAchievementsResponse>(url);
             var achievements = result?.PlayerStats.Achievements ?? [];
             return achievements.ToDictionary(a => a.ApiName);
         }
         catch (HttpRequestException)
         {
-            // Games without achievements (or a private profile) return an error here; treat as "nothing unlocked".
             return new Dictionary<string, PlayerAchievementDto>();
         }
     }
@@ -75,7 +75,7 @@ public class DirectSteamDataProvider : ISteamDataProvider
     {
         try
         {
-            var url = $"ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?format=json&gameid={appId}";
+            var url = $"rarity?appid={appId}";
             var result = await Client.GetFromJsonAsync<GlobalPercentagesResponse>(url);
             var achievements = result?.AchievementPercentages.Achievements ?? [];
             return achievements.ToDictionary(a => a.Name, a => a.Percent);

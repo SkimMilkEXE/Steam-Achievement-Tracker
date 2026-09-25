@@ -26,7 +26,7 @@ public partial class GameDetailViewModel : ViewModelBase
 
     public event EventHandler? BackRequested;
 
-    public GameDetailViewModel(Game game, AppSettings settings) : this(game, settings, new DirectSteamDataProvider())
+    public GameDetailViewModel(Game game, AppSettings settings) : this(game, settings, new WorkerSteamDataProvider())
     {
     }
 

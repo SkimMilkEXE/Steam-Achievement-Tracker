@@ -15,9 +15,9 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         var settings = _settingsService.Load();
-        var hasCredentials = !string.IsNullOrWhiteSpace(settings.ApiKey) && !string.IsNullOrWhiteSpace(settings.SteamIdOrVanity);
 
-        CurrentPage = hasCredentials ? GetLibraryPage() : CreateSettingsPage();
+        // v2 (the Worker) needs no API key - only a Steam ID/vanity name to get started.
+        CurrentPage = string.IsNullOrWhiteSpace(settings.SteamIdOrVanity) ? CreateSettingsPage() : GetLibraryPage();
     }
 
     private SettingsViewModel CreateSettingsPage()

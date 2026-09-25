@@ -1,12 +1,12 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "steam-achievement-tracker-api",
+  "name": "steam-tracker-api",
   "main": "src/index.ts",
   "compatibility_date": "2025-01-01",
   "kv_namespaces": [
     {
       "binding": "RATE_LIMIT",
-      "id": "REPLACE_WITH_KV_NAMESPACE_ID"
+      "id": "32188ebf23104e89ba4ed9a5b272767f"
     }
   ]
 }

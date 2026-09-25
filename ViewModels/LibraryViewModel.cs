@@ -24,7 +24,7 @@ public partial class LibraryViewModel : ViewModelBase
     public event EventHandler? OpenSettingsRequested;
     public event EventHandler<Game>? OpenGameRequested;
 
-    public LibraryViewModel(AppSettings settings) : this(settings, new DirectSteamDataProvider())
+    public LibraryViewModel(AppSettings settings) : this(settings, new WorkerSteamDataProvider())
     {
     }
 
