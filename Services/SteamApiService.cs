@@ -46,6 +46,159 @@ public class SteamApiService
         }).ToList();
     }
 
+    public async Task<List<Achievement>> GetAchievementsAsync(int appId, string steamId, string apiKey)
+    {
+        var schema = await GetSchemaAsync(appId, apiKey);
+        if (schema.Count == 0)
+            return [];
+
+        var unlocked = await GetPlayerAchievementsAsync(appId, steamId, apiKey);
+        var percentages = await GetGlobalPercentagesAsync(appId);
+
+        return schema.Select(kvp =>
+        {
+            unlocked.TryGetValue(kvp.Key, out var unlock);
+            percentages.TryGetValue(kvp.Key, out var percent);
+
+            return new Achievement
+            {
+                ApiName = kvp.Key,
+                DisplayName = kvp.Value.DisplayName,
+                Description = kvp.Value.Description ?? string.Empty,
+                IconUrl = kvp.Value.Icon ?? string.Empty,
+                IconGrayUrl = kvp.Value.IconGray ?? string.Empty,
+                Unlocked = unlock?.Achieved == 1,
+                UnlockedAt = unlock?.UnlockTime is > 0
+                    ? DateTimeOffset.FromUnixTimeSeconds(unlock.UnlockTime)
+                    : null,
+                GlobalPercent = percent
+            };
+        })
+        .OrderByDescending(a => a.Unlocked)
+        .ThenByDescending(a => a.GlobalPercent)
+        .ToList();
+    }
+
+    private async Task<Dictionary<string, SchemaAchievementDto>> GetSchemaAsync(int appId, string apiKey)
+    {
+        var url = $"ISteamUserStats/GetSchemaForGame/v2/?key={apiKey}&format=json&appid={appId}";
+        var result = await Client.GetFromJsonAsync<SchemaResponse>(url);
+        var achievements = result?.Game.AvailableGameStats?.Achievements ?? [];
+        return achievements.ToDictionary(a => a.Name);
+    }
+
+    private async Task<Dictionary<string, PlayerAchievementDto>> GetPlayerAchievementsAsync(int appId, string steamId, string apiKey)
+    {
+        try
+        {
+            var url = $"ISteamUserStats/GetPlayerAchievements/v1/?key={apiKey}&format=json&steamid={steamId}&appid={appId}";
+            var result = await Client.GetFromJsonAsync<PlayerAchievementsResponse>(url);
+            var achievements = result?.PlayerStats.Achievements ?? [];
+            return achievements.ToDictionary(a => a.ApiName);
+        }
+        catch (HttpRequestException)
+        {
+            // Games without achievements (or a private profile) return an error here; treat as "nothing unlocked".
+            return new Dictionary<string, PlayerAchievementDto>();
+        }
+    }
+
+    private async Task<Dictionary<string, double>> GetGlobalPercentagesAsync(int appId)
+    {
+        try
+        {
+            var url = $"ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?format=json&gameid={appId}";
+            var result = await Client.GetFromJsonAsync<GlobalPercentagesResponse>(url);
+            var achievements = result?.AchievementPercentages.Achievements ?? [];
+            return achievements.ToDictionary(a => a.Name, a => a.Percent);
+        }
+        catch (HttpRequestException)
+        {
+            return new Dictionary<string, double>();
+        }
+    }
+
+    private class SchemaResponse
+    {
+        [JsonPropertyName("game")]
+        public SchemaGame Game { get; set; } = new();
+    }
+
+    private class SchemaGame
+    {
+        [JsonPropertyName("availableGameStats")]
+        public SchemaGameStats? AvailableGameStats { get; set; }
+    }
+
+    private class SchemaGameStats
+    {
+        [JsonPropertyName("achievements")]
+        public List<SchemaAchievementDto>? Achievements { get; set; }
+    }
+
+    private class SchemaAchievementDto
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("displayName")]
+        public string DisplayName { get; set; } = string.Empty;
+
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+
+        [JsonPropertyName("icon")]
+        public string? Icon { get; set; }
+
+        [JsonPropertyName("icongray")]
+        public string? IconGray { get; set; }
+    }
+
+    private class PlayerAchievementsResponse
+    {
+        [JsonPropertyName("playerstats")]
+        public PlayerStatsDto PlayerStats { get; set; } = new();
+    }
+
+    private class PlayerStatsDto
+    {
+        [JsonPropertyName("achievements")]
+        public List<PlayerAchievementDto>? Achievements { get; set; }
+    }
+
+    private class PlayerAchievementDto
+    {
+        [JsonPropertyName("apiname")]
+        public string ApiName { get; set; } = string.Empty;
+
+        [JsonPropertyName("achieved")]
+        public int Achieved { get; set; }
+
+        [JsonPropertyName("unlocktime")]
+        public long UnlockTime { get; set; }
+    }
+
+    private class GlobalPercentagesResponse
+    {
+        [JsonPropertyName("achievementpercentages")]
+        public GlobalPercentagesInner AchievementPercentages { get; set; } = new();
+    }
+
+    private class GlobalPercentagesInner
+    {
+        [JsonPropertyName("achievements")]
+        public List<GlobalPercentageDto>? Achievements { get; set; }
+    }
+
+    private class GlobalPercentageDto
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("percent")]
+        public double Percent { get; set; }
+    }
+
     private class ResolveVanityResponse
     {
         [JsonPropertyName("response")]

@@ -23,10 +23,15 @@
         <ListBox ItemsSource="{Binding Games}">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:GameListItem">
-                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="4">
-                        <Image Source="{Binding Icon}" Width="32" Height="32" />
-                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                    </StackPanel>
+                    <Button Command="{Binding $parent[UserControl].((vm:LibraryViewModel)DataContext).OpenGameCommand}"
+                            CommandParameter="{Binding}"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent" BorderThickness="0" Padding="4">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Image Source="{Binding Icon}" Width="32" Height="32" />
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

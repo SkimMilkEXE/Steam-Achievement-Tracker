@@ -1,13 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
-using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,7 +10,6 @@ namespace AchievementTracker.ViewModels;
 
 public partial class LibraryViewModel : ViewModelBase
 {
-    private static readonly HttpClient IconClient = new();
     private readonly SteamApiService _steamApiService;
     private readonly AppSettings _settings;
 
@@ -28,6 +22,7 @@ public partial class LibraryViewModel : ViewModelBase
     public ObservableCollection<GameListItem> Games { get; } = new();
 
     public event EventHandler? OpenSettingsRequested;
+    public event EventHandler<Game>? OpenGameRequested;
 
     public LibraryViewModel(AppSettings settings) : this(settings, new SteamApiService())
     {
@@ -55,7 +50,7 @@ public partial class LibraryViewModel : ViewModelBase
             foreach (var game in games)
                 Games.Add(new GameListItem(game));
 
-            await LoadIconsAsync();
+            await IconLoader.LoadAllAsync(Games, g => g.Game.IconUrl, (g, bmp) => g.Icon = bmp);
         }
         catch (Exception ex)
         {
@@ -67,34 +62,13 @@ public partial class LibraryViewModel : ViewModelBase
         }
     }
 
-    private async Task LoadIconsAsync()
-    {
-        using var throttle = new SemaphoreSlim(4);
-
-        var tasks = Games.Select(async item =>
-        {
-            if (string.IsNullOrEmpty(item.Game.IconUrl))
-                return;
-
-            await throttle.WaitAsync();
-            try
-            {
-                var bytes = await IconClient.GetByteArrayAsync(item.Game.IconUrl);
-                item.Icon = new Bitmap(new MemoryStream(bytes));
-            }
-            catch
-            {
-                // ponytail: a missing icon just shows blank, not worth surfacing per-game errors
-            }
-            finally
-            {
-                throttle.Release();
-            }
-        });
-
-        await Task.WhenAll(tasks);
-    }
-
     [RelayCommand]
     private void OpenSettings() => OpenSettingsRequested?.Invoke(this, EventArgs.Empty);
+
+    [RelayCommand]
+    private void OpenGame(GameListItem? item)
+    {
+        if (item is not null)
+            OpenGameRequested?.Invoke(this, item.Game);
+    }
 }
