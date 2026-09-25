@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace AchievementTracker.Views;
 
-public partial class SettingsView : UserControl
+public partial class LibraryView : UserControl
 {
-    public SettingsView()
+    public LibraryView()
     {
         InitializeComponent();
     }

@@ -1,3 +1,4 @@
+using System;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,6 +9,8 @@ namespace AchievementTracker.ViewModels;
 public partial class SettingsViewModel : ViewModelBase
 {
     private readonly SettingsService _settingsService;
+
+    public event EventHandler? Saved;
 
     [ObservableProperty]
     public partial string ApiKey { get; set; } = string.Empty;
@@ -35,5 +38,6 @@ public partial class SettingsViewModel : ViewModelBase
     {
         _settingsService.Save(new AppSettings { ApiKey = ApiKey, SteamIdOrVanity = SteamIdOrVanity });
         StatusMessage = "Saved.";
+        Saved?.Invoke(this, EventArgs.Empty);
     }
 }

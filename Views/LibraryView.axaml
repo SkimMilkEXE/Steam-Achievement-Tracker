@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:AchievementTracker.ViewModels"
+             xmlns:conv="using:Avalonia.Data.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+             x:Class="AchievementTracker.Views.LibraryView"
+             x:DataType="vm:LibraryViewModel">
+
+    <DockPanel Margin="16">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <Button DockPanel.Dock="Right" Content="Settings" Command="{Binding OpenSettingsCommand}" />
+            <TextBlock Text="Your Library" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
+        </DockPanel>
+
+        <TextBlock DockPanel.Dock="Top" Text="{Binding ErrorMessage}" Foreground="IndianRed"
+                   IsVisible="{Binding ErrorMessage, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"
+                   Margin="0,0,0,12" TextWrapping="Wrap" />
+
+        <TextBlock DockPanel.Dock="Top" Text="Loading..." IsVisible="{Binding IsLoading}" Margin="0,0,0,12" />
+
+        <ListBox ItemsSource="{Binding Games}">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:GameListItem">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="4">
+                        <Image Source="{Binding Icon}" Width="32" Height="32" />
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+
+</UserControl>
