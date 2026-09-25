@@ -10,7 +10,7 @@ namespace AchievementTracker.ViewModels;
 
 public partial class LibraryViewModel : ViewModelBase
 {
-    private readonly SteamApiService _steamApiService;
+    private readonly ISteamDataProvider _steamDataProvider;
     private readonly AppSettings _settings;
 
     [ObservableProperty]
@@ -24,14 +24,14 @@ public partial class LibraryViewModel : ViewModelBase
     public event EventHandler? OpenSettingsRequested;
     public event EventHandler<Game>? OpenGameRequested;
 
-    public LibraryViewModel(AppSettings settings) : this(settings, new SteamApiService())
+    public LibraryViewModel(AppSettings settings) : this(settings, new DirectSteamDataProvider())
     {
     }
 
-    public LibraryViewModel(AppSettings settings, SteamApiService steamApiService)
+    public LibraryViewModel(AppSettings settings, ISteamDataProvider steamDataProvider)
     {
         _settings = settings;
-        _steamApiService = steamApiService;
+        _steamDataProvider = steamDataProvider;
         _ = LoadAsync();
     }
 
@@ -44,8 +44,8 @@ public partial class LibraryViewModel : ViewModelBase
 
         try
         {
-            var steamId = await _steamApiService.ResolveSteamIdAsync(_settings.SteamIdOrVanity, _settings.ApiKey);
-            var games = await _steamApiService.GetOwnedGamesAsync(steamId, _settings.ApiKey);
+            var steamId = await _steamDataProvider.ResolveSteamIdAsync(_settings.SteamIdOrVanity, _settings.ApiKey);
+            var games = await _steamDataProvider.GetOwnedGamesAsync(steamId, _settings.ApiKey);
 
             foreach (var game in games)
                 Games.Add(new GameListItem(game));

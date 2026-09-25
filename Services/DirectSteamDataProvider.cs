@@ -9,7 +9,7 @@ using AchievementTracker.Models;
 
 namespace AchievementTracker.Services;
 
-public class SteamApiService
+public class DirectSteamDataProvider : ISteamDataProvider
 {
     private static readonly HttpClient Client = new() { BaseAddress = new Uri("https://api.steampowered.com/") };
 

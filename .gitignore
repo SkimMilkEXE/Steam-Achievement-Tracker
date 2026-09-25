@@ -483,3 +483,8 @@ $RECYCLE.BIN/
 
 # temp ignores
 CLAUDE.md
+
+# Cloudflare Worker backend
+backend/node_modules/
+backend/.wrangler/
+backend/.dev.vars

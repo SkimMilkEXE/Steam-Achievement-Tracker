@@ -12,7 +12,7 @@ public partial class GameDetailViewModel : ViewModelBase
 {
     private readonly Game _game;
     private readonly AppSettings _settings;
-    private readonly SteamApiService _steamApiService;
+    private readonly ISteamDataProvider _steamDataProvider;
 
     public string GameName => _game.Name;
 
@@ -26,15 +26,15 @@ public partial class GameDetailViewModel : ViewModelBase
 
     public event EventHandler? BackRequested;
 
-    public GameDetailViewModel(Game game, AppSettings settings) : this(game, settings, new SteamApiService())
+    public GameDetailViewModel(Game game, AppSettings settings) : this(game, settings, new DirectSteamDataProvider())
     {
     }
 
-    public GameDetailViewModel(Game game, AppSettings settings, SteamApiService steamApiService)
+    public GameDetailViewModel(Game game, AppSettings settings, ISteamDataProvider steamDataProvider)
     {
         _game = game;
         _settings = settings;
-        _steamApiService = steamApiService;
+        _steamDataProvider = steamDataProvider;
         _ = LoadAsync();
     }
 
@@ -47,8 +47,8 @@ public partial class GameDetailViewModel : ViewModelBase
 
         try
         {
-            var steamId = await _steamApiService.ResolveSteamIdAsync(_settings.SteamIdOrVanity, _settings.ApiKey);
-            var achievements = await _steamApiService.GetAchievementsAsync(_game.AppId, steamId, _settings.ApiKey);
+            var steamId = await _steamDataProvider.ResolveSteamIdAsync(_settings.SteamIdOrVanity, _settings.ApiKey);
+            var achievements = await _steamDataProvider.GetAchievementsAsync(_game.AppId, steamId, _settings.ApiKey);
 
             if (achievements.Count == 0)
             {
