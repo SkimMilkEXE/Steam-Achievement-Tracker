@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -36,8 +37,18 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void Save()
     {
+        SteamIdOrVanity = NormalizeSteamIdOrVanity(SteamIdOrVanity);
         _settingsService.Save(new AppSettings { ApiKey = ApiKey, SteamIdOrVanity = SteamIdOrVanity });
         StatusMessage = "Saved.";
         Saved?.Invoke(this, EventArgs.Empty);
+    }
+
+    // Lets people paste a full profile URL (steamcommunity.com/id/NAME or /profiles/ID)
+    // instead of having to extract the name/ID themselves.
+    private static string NormalizeSteamIdOrVanity(string input)
+    {
+        var trimmed = input.Trim();
+        var match = Regex.Match(trimmed, @"steamcommunity\.com/(?:id|profiles)/([^/\s]+)", RegexOptions.IgnoreCase);
+        return match.Success ? match.Groups[1].Value : trimmed;
     }
 }
