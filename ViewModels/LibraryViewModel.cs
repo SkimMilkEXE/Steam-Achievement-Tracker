@@ -26,6 +26,11 @@ public partial class LibraryViewModel : ViewModelBase
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    [ObservableProperty]
+    public partial LibrarySortMode SortMode { get; set; } = LibrarySortMode.NameAZ;
+
+    public LibrarySortMode[] SortOptions { get; } = Enum.GetValues<LibrarySortMode>();
+
     public ObservableCollection<GameListItem> Games { get; } = new();
 
     public event EventHandler? OpenSettingsRequested;
@@ -55,6 +60,7 @@ public partial class LibraryViewModel : ViewModelBase
     }
 
     partial void OnSearchTextChanged(string value) => ApplyFilter();
+    partial void OnSortModeChanged(LibrarySortMode value) => ApplyFilter();
 
     [RelayCommand]
     private async Task RefreshAsync()
@@ -64,8 +70,8 @@ public partial class LibraryViewModel : ViewModelBase
 
         try
         {
-            var steamId = await _steamDataProvider.ResolveSteamIdAsync(_settings.SteamIdOrVanity, _settings.ApiKey);
-            var games = await _steamDataProvider.GetOwnedGamesAsync(steamId, _settings.ApiKey);
+            var steamId = await _steamDataProvider.ResolveSteamIdAsync(_settings.SteamIdOrVanity);
+            var games = await _steamDataProvider.GetOwnedGamesAsync(steamId);
 
             _databaseService.SaveGames(games);
             SetGames(games);
@@ -97,9 +103,18 @@ public partial class LibraryViewModel : ViewModelBase
 
     private void ApplyFilter()
     {
-        var query = string.IsNullOrWhiteSpace(SearchText)
+        IEnumerable<GameListItem> query = string.IsNullOrWhiteSpace(SearchText)
             ? _allGames
             : _allGames.Where(g => g.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+
+        query = SortMode switch
+        {
+            LibrarySortMode.NameAZ => query.OrderBy(g => g.Name, StringComparer.OrdinalIgnoreCase),
+            LibrarySortMode.NameZA => query.OrderByDescending(g => g.Name, StringComparer.OrdinalIgnoreCase),
+            LibrarySortMode.MostComplete => query.OrderByDescending(g => g.CompletionFraction),
+            LibrarySortMode.LeastComplete => query.OrderBy(g => g.CompletionFraction),
+            _ => query
+        };
 
         Games.Clear();
         foreach (var game in query)

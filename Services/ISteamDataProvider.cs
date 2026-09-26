@@ -6,7 +6,7 @@ namespace AchievementTracker.Services;
 
 public interface ISteamDataProvider
 {
-    Task<string> ResolveSteamIdAsync(string steamIdOrVanity, string apiKey);
-    Task<List<Game>> GetOwnedGamesAsync(string steamId, string apiKey);
-    Task<List<Achievement>> GetAchievementsAsync(int appId, string steamId, string apiKey);
+    Task<string> ResolveSteamIdAsync(string steamIdOrVanity);
+    Task<List<Game>> GetOwnedGamesAsync(string steamId);
+    Task<List<Achievement>> GetAchievementsAsync(int appId, string steamId);
 }

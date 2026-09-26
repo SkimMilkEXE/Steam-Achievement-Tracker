@@ -8,13 +8,13 @@ using AchievementTracker.Models;
 
 namespace AchievementTracker.Services;
 
-// v2: calls the developer's Cloudflare Worker, which holds the Steam key as a secret.
-// Users need no key of their own - the apiKey parameters on ISteamDataProvider are simply unused here.
+// Calls the developer's Cloudflare Worker, which holds the Steam key as a secret server-side.
+// Users need no key of their own.
 public class WorkerSteamDataProvider : ISteamDataProvider
 {
     private static readonly HttpClient Client = new() { BaseAddress = new Uri("https://steam-tracker-api.richardhurley374.workers.dev/") };
 
-    public async Task<string> ResolveSteamIdAsync(string steamIdOrVanity, string apiKey)
+    public async Task<string> ResolveSteamIdAsync(string steamIdOrVanity)
     {
         if (steamIdOrVanity.Length == 17 && steamIdOrVanity.All(char.IsDigit))
             return steamIdOrVanity;
@@ -29,14 +29,14 @@ public class WorkerSteamDataProvider : ISteamDataProvider
         return result.Response.SteamId;
     }
 
-    public async Task<List<Game>> GetOwnedGamesAsync(string steamId, string apiKey)
+    public async Task<List<Game>> GetOwnedGamesAsync(string steamId)
     {
         var url = $"owned-games?steamid={steamId}";
         var result = await Client.GetFromJsonAsync<OwnedGamesResponse>(url);
         return SteamAchievementMerger.ToGames(result);
     }
 
-    public async Task<List<Achievement>> GetAchievementsAsync(int appId, string steamId, string apiKey)
+    public async Task<List<Achievement>> GetAchievementsAsync(int appId, string steamId)
     {
         var schema = await GetSchemaAsync(appId);
         if (schema.Count == 0)

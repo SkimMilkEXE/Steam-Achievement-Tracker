@@ -39,6 +39,7 @@ internal static class SteamAchievementMerger
                 IconUrl = kvp.Value.Icon ?? string.Empty,
                 IconGrayUrl = kvp.Value.IconGray ?? string.Empty,
                 Unlocked = unlock?.Achieved == 1,
+                Hidden = kvp.Value.Hidden == 1,
                 UnlockedAt = unlock?.UnlockTime is > 0
                     ? DateTimeOffset.FromUnixTimeSeconds(unlock.UnlockTime)
                     : null,

@@ -3,8 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AchievementTracker.Services;
 
-// Shapes shared by DirectSteamDataProvider (calls Steam directly) and WorkerSteamDataProvider
-// (calls the Cloudflare Worker, which proxies Steam's JSON through unchanged).
+// Shapes matching what the Cloudflare Worker returns, which proxies Steam's own JSON through unchanged.
 
 internal class ResolveVanityResponse
 {
@@ -79,6 +78,9 @@ internal class SchemaAchievementDto
 
     [JsonPropertyName("icongray")]
     public string? IconGray { get; set; }
+
+    [JsonPropertyName("hidden")]
+    public int Hidden { get; set; }
 }
 
 internal class PlayerAchievementsResponse

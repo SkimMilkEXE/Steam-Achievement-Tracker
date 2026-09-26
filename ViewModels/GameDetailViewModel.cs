@@ -79,8 +79,8 @@ public partial class GameDetailViewModel : ViewModelBase
 
         try
         {
-            var steamId = await _steamDataProvider.ResolveSteamIdAsync(_settings.SteamIdOrVanity, _settings.ApiKey);
-            var achievements = await _steamDataProvider.GetAchievementsAsync(_game.AppId, steamId, _settings.ApiKey);
+            var steamId = await _steamDataProvider.ResolveSteamIdAsync(_settings.SteamIdOrVanity);
+            var achievements = await _steamDataProvider.GetAchievementsAsync(_game.AppId, steamId);
 
             if (achievements.Count == 0)
             {
@@ -106,7 +106,7 @@ public partial class GameDetailViewModel : ViewModelBase
     private void SetAchievements(IEnumerable<Achievement> achievements)
     {
         _allAchievements = achievements
-            .Select(a => new AchievementListItem(_game.AppId, a, _databaseService))
+            .Select(a => new AchievementListItem(_game.AppId, MaskIfHidden(a), _databaseService))
             .ToList();
 
         var total = _allAchievements.Count;
@@ -115,6 +115,26 @@ public partial class GameDetailViewModel : ViewModelBase
         CompletionText = total > 0 ? $"{unlocked}/{total} ({CompletionFraction:P0})" : string.Empty;
 
         ApplyView();
+    }
+
+    // Steam marks some achievements "hidden" so their name/description stay spoilers until unlocked.
+    private Achievement MaskIfHidden(Achievement achievement)
+    {
+        if (!achievement.Hidden || achievement.Unlocked || _settings.RevealHiddenAchievements)
+            return achievement;
+
+        return new Achievement
+        {
+            ApiName = achievement.ApiName,
+            DisplayName = "Hidden Achievement",
+            Description = "Unlock this achievement to reveal its details.",
+            IconUrl = achievement.IconUrl,
+            IconGrayUrl = achievement.IconGrayUrl,
+            Unlocked = achievement.Unlocked,
+            Hidden = achievement.Hidden,
+            UnlockedAt = achievement.UnlockedAt,
+            GlobalPercent = achievement.GlobalPercent
+        };
     }
 
     private void ApplyView()

@@ -39,6 +39,7 @@ public class DatabaseService
                 IconUrl TEXT NOT NULL,
                 IconGrayUrl TEXT NOT NULL,
                 Unlocked INTEGER NOT NULL,
+                Hidden INTEGER NOT NULL DEFAULT 0,
                 UnlockedAtUnix INTEGER NULL,
                 GlobalPercent REAL NULL,
                 PRIMARY KEY (AppId, ApiName)
@@ -60,6 +61,15 @@ public class DatabaseService
                 Checked INTEGER NOT NULL DEFAULT 0
             );
             """);
+
+        try
+        {
+            connection.Execute("ALTER TABLE Achievements ADD COLUMN Hidden INTEGER NOT NULL DEFAULT 0");
+        }
+        catch (SqliteException)
+        {
+            // Column already exists from a previous version of the cache.
+        }
     }
 
     private SqliteConnection OpenConnection()
@@ -126,9 +136,9 @@ public class DatabaseService
         connection.Execute(
             """
             INSERT INTO Achievements
-                (AppId, ApiName, DisplayName, Description, IconUrl, IconGrayUrl, Unlocked, UnlockedAtUnix, GlobalPercent)
+                (AppId, ApiName, DisplayName, Description, IconUrl, IconGrayUrl, Unlocked, Hidden, UnlockedAtUnix, GlobalPercent)
             VALUES
-                (@AppId, @ApiName, @DisplayName, @Description, @IconUrl, @IconGrayUrl, @Unlocked, @UnlockedAtUnix, @GlobalPercent)
+                (@AppId, @ApiName, @DisplayName, @Description, @IconUrl, @IconGrayUrl, @Unlocked, @Hidden, @UnlockedAtUnix, @GlobalPercent)
             """,
             achievements.Select(a => new AchievementRow
             {
@@ -139,6 +149,7 @@ public class DatabaseService
                 IconUrl = a.IconUrl,
                 IconGrayUrl = a.IconGrayUrl,
                 Unlocked = a.Unlocked,
+                Hidden = a.Hidden,
                 UnlockedAtUnix = a.UnlockedAt?.ToUnixTimeSeconds(),
                 GlobalPercent = a.GlobalPercent
             }),
@@ -229,6 +240,7 @@ public class DatabaseService
         IconUrl = row.IconUrl,
         IconGrayUrl = row.IconGrayUrl,
         Unlocked = row.Unlocked,
+        Hidden = row.Hidden,
         UnlockedAt = row.UnlockedAtUnix is long unix ? DateTimeOffset.FromUnixTimeSeconds(unix) : null,
         GlobalPercent = row.GlobalPercent
     };
@@ -242,6 +254,7 @@ public class DatabaseService
         public string IconUrl { get; set; } = string.Empty;
         public string IconGrayUrl { get; set; } = string.Empty;
         public bool Unlocked { get; set; }
+        public bool Hidden { get; set; }
         public long? UnlockedAtUnix { get; set; }
         public double? GlobalPercent { get; set; }
     }
