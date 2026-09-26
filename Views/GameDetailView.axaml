@@ -36,8 +36,8 @@
         <ListBox ItemsSource="{Binding Achievements}">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:AchievementListItem">
-                    <Border BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,0,1" Padding="0,8">
-                        <StackPanel Spacing="6">
+                    <StackPanel>
+                        <StackPanel Spacing="6" Margin="0,8">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Image Source="{Binding Icon}" Width="40" Height="40" />
                                 <StackPanel>
@@ -72,7 +72,8 @@
                                 <Button Content="Add" Command="{Binding AddChecklistItemCommand}" />
                             </StackPanel>
                         </StackPanel>
-                    </Border>
+                        <Border Height="1" Background="{DynamicResource AppBorderBrush}" Margin="52,0,8,0" />
+                    </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

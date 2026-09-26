@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:AchievementTracker.ViewModels"
+        xmlns:controls="using:AchievementTracker.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -10,25 +11,39 @@
         Background="{DynamicResource AppBackgroundBrush}"
         Title="Achievement Tracker">
 
-    <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_File">
-                <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
-            </MenuItem>
-            <MenuItem Header="_View">
-                <MenuItem Header="_Library" Command="{Binding NavigateLibraryCommand}" />
-                <MenuItem Header="_Currently Hunting" Command="{Binding NavigateHuntingCommand}" />
-                <MenuItem Header="_Settings" Command="{Binding NavigateSettingsCommand}" />
-            </MenuItem>
-            <MenuItem Header="_Help">
-                <MenuItem Header="_About" Command="{Binding ShowAboutCommand}" />
-            </MenuItem>
-        </Menu>
+    <Panel>
+        <controls:ParticleBackground />
 
-        <TextBlock DockPanel.Dock="Bottom" Text="Built by SkimMilk.EXE" FontSize="11" Opacity="0.5"
-                   HorizontalAlignment="Center" Margin="0,4,0,6" />
+        <DockPanel>
+            <Border DockPanel.Dock="Top" Background="{DynamicResource AppPanelBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,0,1">
+                <Menu Background="Transparent">
+                    <Menu.Styles>
+                        <Style Selector="Menu > MenuItem">
+                            <Setter Property="Padding" Value="18,10" />
+                            <Setter Property="MinHeight" Value="40" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+                            <Setter Property="BorderThickness" Value="0,0,1,0" />
+                        </Style>
+                    </Menu.Styles>
+                    <MenuItem Header="_File">
+                        <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
+                    </MenuItem>
+                    <MenuItem Header="_View">
+                        <MenuItem Header="_Library" Command="{Binding NavigateLibraryCommand}" />
+                        <MenuItem Header="_Currently Hunting" Command="{Binding NavigateHuntingCommand}" />
+                        <MenuItem Header="_Settings" Command="{Binding NavigateSettingsCommand}" />
+                    </MenuItem>
+                    <MenuItem Header="_Help">
+                        <MenuItem Header="_About" Command="{Binding ShowAboutCommand}" />
+                    </MenuItem>
+                </Menu>
+            </Border>
 
-        <ContentControl Content="{Binding CurrentPage}" />
-    </DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Text="Built by SkimMilk.EXE" FontSize="11" Opacity="0.5"
+                       HorizontalAlignment="Center" Margin="0,4,0,6" />
+
+            <ContentControl Content="{Binding CurrentPage}" />
+        </DockPanel>
+    </Panel>
 
 </Window>

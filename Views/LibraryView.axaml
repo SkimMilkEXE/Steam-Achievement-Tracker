@@ -37,19 +37,22 @@
         <ListBox ItemsSource="{Binding Games}">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:GameListItem">
-                    <Button Command="{Binding $parent[UserControl].((vm:LibraryViewModel)DataContext).OpenGameCommand}"
-                            CommandParameter="{Binding}"
-                            HorizontalContentAlignment="Stretch"
-                            Background="Transparent" BorderThickness="0" Padding="4">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Image Source="{Binding Icon}" Width="32" Height="32" />
-                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Width="280" />
-                            <ProgressBar Minimum="0" Maximum="1" Value="{Binding CompletionFraction}"
-                                         IsVisible="{Binding HasCompletion}" Width="120" Height="6" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding CompletionText}" IsVisible="{Binding HasCompletion}"
-                                       FontSize="11" Opacity="0.7" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
+                    <StackPanel>
+                        <Button Command="{Binding $parent[UserControl].((vm:LibraryViewModel)DataContext).OpenGameCommand}"
+                                CommandParameter="{Binding}"
+                                HorizontalContentAlignment="Stretch"
+                                Background="Transparent" BorderThickness="0" Padding="4">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Image Source="{Binding Icon}" Width="32" Height="32" />
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Width="280" />
+                                <ProgressBar Minimum="0" Maximum="1" Value="{Binding CompletionFraction}"
+                                             IsVisible="{Binding HasCompletion}" Width="120" Height="6" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding CompletionText}" IsVisible="{Binding HasCompletion}"
+                                           FontSize="11" Opacity="0.7" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Border Height="1" Background="{DynamicResource AppBorderBrush}" Margin="44,0,8,0" />
+                    </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
