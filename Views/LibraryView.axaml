@@ -32,32 +32,90 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            <ToggleSwitch IsChecked="{Binding IsGridView}" OnContent="Grid" OffContent="List" Margin="16,0,0,0" />
         </StackPanel>
 
-        <ListBox ItemsSource="{Binding Games}">
-            <ListBox.ItemTemplate>
-                <DataTemplate x:DataType="vm:GameListItem">
-                    <StackPanel>
+        <!-- A single Panel here (not two sibling ListBoxes) keeps this the DockPanel's one
+             "fill remaining space" child; otherwise only the last child would stretch. -->
+        <Panel>
+            <ListBox ItemsSource="{Binding Games}" IsVisible="{Binding !IsGridView}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:GameListItem">
+                        <StackPanel>
+                            <Button Command="{Binding $parent[UserControl].((vm:LibraryViewModel)DataContext).OpenGameCommand}"
+                                    CommandParameter="{Binding}"
+                                    HorizontalContentAlignment="Stretch"
+                                    Background="Transparent" BorderThickness="0" Padding="4">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Image Source="{Binding Icon}" Width="32" Height="32" />
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Width="280" />
+                                    <ProgressBar Minimum="0" Maximum="1" Value="{Binding CompletionFraction}"
+                                                 IsVisible="{Binding HasCompletion}" Width="120" Height="6" VerticalAlignment="Center" />
+                                    <Image Source="{Binding TrophyIcon}" Width="36" Height="36" VerticalAlignment="Center"
+                                           IsVisible="{Binding TrophyIcon, Converter={x:Static conv:ObjectConverters.IsNotNull}}" />
+                                    <TextBlock Text="{Binding CompletionText}" IsVisible="{Binding HasCompletion}"
+                                               FontSize="11" Opacity="0.7" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Border Height="1" Background="{DynamicResource AppBorderBrush}" Margin="44,0,8,0" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <ListBox ItemsSource="{Binding Games}" IsVisible="{Binding IsGridView}"
+                     MaxWidth="1800" HorizontalAlignment="Center">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.Styles>
+                    <!-- The card's own Border below is the only highlight we want - strip the
+                         default ListBoxItem hover/selected background so it doesn't show through
+                         as a second, differently-sized box behind the card. -->
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    </Style>
+                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                </ListBox.Styles>
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:GameListItem">
                         <Button Command="{Binding $parent[UserControl].((vm:LibraryViewModel)DataContext).OpenGameCommand}"
                                 CommandParameter="{Binding}"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
-                                Background="Transparent" BorderThickness="0" Padding="4">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Image Source="{Binding Icon}" Width="32" Height="32" />
-                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Width="280" />
+                                Background="Transparent"
+                                BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="8"
+                                Margin="4" Padding="8">
+                            <StackPanel Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Top">
+                                <Border Width="200" Height="94" CornerRadius="6" ClipToBounds="True" HorizontalAlignment="Center">
+                                    <Image Source="{Binding BigIcon}" Stretch="UniformToFill"
+                                           RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                </Border>
+                                <TextBlock Text="{Binding Name}" TextAlignment="Center" TextWrapping="Wrap"
+                                           TextTrimming="CharacterEllipsis" MaxLines="2" />
                                 <ProgressBar Minimum="0" Maximum="1" Value="{Binding CompletionFraction}"
-                                             IsVisible="{Binding HasCompletion}" Width="120" Height="6" VerticalAlignment="Center" />
-                                <Image Source="{Binding TrophyIcon}" Width="36" Height="36" VerticalAlignment="Center"
-                                       IsVisible="{Binding TrophyIcon, Converter={x:Static conv:ObjectConverters.IsNotNull}}" />
-                                <TextBlock Text="{Binding CompletionText}" IsVisible="{Binding HasCompletion}"
-                                           FontSize="11" Opacity="0.7" VerticalAlignment="Center" />
+                                             IsVisible="{Binding HasCompletion}" Height="6" />
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                    <Image Source="{Binding TrophyIcon}" Width="24" Height="24" VerticalAlignment="Center"
+                                           IsVisible="{Binding TrophyIcon, Converter={x:Static conv:ObjectConverters.IsNotNull}}" />
+                                    <TextBlock Text="{Binding CompletionText}" IsVisible="{Binding HasCompletion}"
+                                               FontSize="11" Opacity="0.7" VerticalAlignment="Center" />
+                                </StackPanel>
                             </StackPanel>
                         </Button>
-                        <Border Height="1" Background="{DynamicResource AppBorderBrush}" Margin="44,0,8,0" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Panel>
     </DockPanel>
 
 </UserControl>

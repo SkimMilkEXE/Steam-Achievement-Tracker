@@ -26,6 +26,14 @@ public partial class GameListItem : ObservableObject
     [ObservableProperty]
     public partial Bitmap? Icon { get; set; }
 
+    // Steam's owned-games icon is a native 32x32 - fine for the list row, but visibly pixelated
+    // stretched to a grid tile. The store header art is much higher-res and needs no extra API
+    // call (it's just a fixed CDN path keyed by AppId), so grid view uses this instead.
+    public string BigIconUrl => $"https://cdn.cloudflare.steamstatic.com/steam/apps/{Game.AppId}/header.jpg";
+
+    [ObservableProperty]
+    public partial Bitmap? BigIcon { get; set; }
+
     public GameListItem(Game game, int unlocked = 0, int total = 0)
     {
         Game = game;

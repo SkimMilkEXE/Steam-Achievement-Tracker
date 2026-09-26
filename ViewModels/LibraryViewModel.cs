@@ -40,6 +40,9 @@ public partial class LibraryViewModel : ViewModelBase
     [ObservableProperty]
     public partial LibrarySortMode SortMode { get; set; } = LibrarySortMode.NameAZ;
 
+    [ObservableProperty]
+    public partial bool IsGridView { get; set; }
+
     public LibrarySortMode[] SortOptions { get; } = Enum.GetValues<LibrarySortMode>();
 
     public ObservableCollection<GameListItem> Games { get; } = new();
@@ -73,6 +76,14 @@ public partial class LibraryViewModel : ViewModelBase
 
     partial void OnSearchTextChanged(string value) => ApplyFilter();
     partial void OnSortModeChanged(LibrarySortMode value) => ApplyFilter();
+
+    // Grid view's higher-res header images are only fetched once actually needed, and only for
+    // whichever games don't have one loaded yet.
+    partial void OnIsGridViewChanged(bool value)
+    {
+        if (value)
+            _ = IconLoader.LoadAllAsync(_allGames.Where(g => g.BigIcon is null).ToList(), g => g.BigIconUrl, (g, bmp) => g.BigIcon = bmp);
+    }
 
     [RelayCommand]
     private async Task RefreshAsync()
