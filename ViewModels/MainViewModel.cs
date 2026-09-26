@@ -38,6 +38,7 @@ public partial class MainViewModel : ViewModelBase
 
         var vm = new LibraryViewModel(_settingsService.Load());
         vm.OpenSettingsRequested += (_, _) => CurrentPage = CreateSettingsPage();
+        vm.OpenHuntingRequested += (_, _) => CurrentPage = CreateHuntingPage();
         vm.OpenGameRequested += (_, game) => CurrentPage = CreateGameDetailPage(game);
         _libraryPage = vm;
         return vm;
@@ -47,6 +48,14 @@ public partial class MainViewModel : ViewModelBase
     {
         var vm = new GameDetailViewModel(game, _settingsService.Load());
         vm.BackRequested += (_, _) => CurrentPage = GetLibraryPage();
+        return vm;
+    }
+
+    private HuntingViewModel CreateHuntingPage()
+    {
+        var vm = new HuntingViewModel();
+        vm.BackRequested += (_, _) => CurrentPage = GetLibraryPage();
+        vm.OpenGameRequested += (_, game) => CurrentPage = CreateGameDetailPage(game);
         return vm;
     }
 }

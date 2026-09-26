@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
@@ -14,6 +16,7 @@ public partial class GameDetailViewModel : ViewModelBase
     private readonly AppSettings _settings;
     private readonly ISteamDataProvider _steamDataProvider;
     private readonly DatabaseService _databaseService;
+    private List<AchievementListItem> _allAchievements = [];
 
     public string GameName => _game.Name;
 
@@ -22,6 +25,20 @@ public partial class GameDetailViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial string ErrorMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SearchText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial AchievementFilter Filter { get; set; } = AchievementFilter.All;
+
+    [ObservableProperty]
+    public partial string CompletionText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial double CompletionFraction { get; set; }
+
+    public AchievementFilter[] FilterOptions { get; } = Enum.GetValues<AchievementFilter>();
 
     public ObservableCollection<AchievementListItem> Achievements { get; } = new();
 
@@ -42,16 +59,17 @@ public partial class GameDetailViewModel : ViewModelBase
         var cachedAchievements = _databaseService.GetAchievements(game.AppId);
         if (cachedAchievements.Count > 0)
         {
-            foreach (var achievement in cachedAchievements)
-                Achievements.Add(new AchievementListItem(achievement));
-
-            _ = IconLoader.LoadAllAsync(Achievements, a => a.IconUrl, (a, bmp) => a.Icon = bmp);
+            SetAchievements(cachedAchievements);
+            _ = IconLoader.LoadAllAsync(_allAchievements, a => a.IconUrl, (a, bmp) => a.Icon = bmp);
         }
         else
         {
             _ = RefreshAsync();
         }
     }
+
+    partial void OnSearchTextChanged(string value) => ApplyView();
+    partial void OnFilterChanged(AchievementFilter value) => ApplyView();
 
     [RelayCommand]
     private async Task RefreshAsync()
@@ -71,12 +89,9 @@ public partial class GameDetailViewModel : ViewModelBase
             }
 
             _databaseService.SaveAchievements(_game.AppId, achievements);
+            SetAchievements(achievements);
 
-            Achievements.Clear();
-            foreach (var achievement in achievements)
-                Achievements.Add(new AchievementListItem(achievement));
-
-            await IconLoader.LoadAllAsync(Achievements, a => a.IconUrl, (a, bmp) => a.Icon = bmp);
+            await IconLoader.LoadAllAsync(_allAchievements, a => a.IconUrl, (a, bmp) => a.Icon = bmp);
         }
         catch (Exception ex)
         {
@@ -86,6 +101,44 @@ public partial class GameDetailViewModel : ViewModelBase
         {
             IsLoading = false;
         }
+    }
+
+    private void SetAchievements(IEnumerable<Achievement> achievements)
+    {
+        _allAchievements = achievements
+            .Select(a => new AchievementListItem(_game.AppId, a, _databaseService))
+            .ToList();
+
+        var total = _allAchievements.Count;
+        var unlocked = _allAchievements.Count(a => a.Unlocked);
+        CompletionFraction = total > 0 ? (double)unlocked / total : 0;
+        CompletionText = total > 0 ? $"{unlocked}/{total} ({CompletionFraction:P0})" : string.Empty;
+
+        ApplyView();
+    }
+
+    private void ApplyView()
+    {
+        IEnumerable<AchievementListItem> query = _allAchievements;
+
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            query = query.Where(a =>
+                a.DisplayName.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                a.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+        }
+
+        query = Filter switch
+        {
+            AchievementFilter.Missing => query.Where(a => !a.Unlocked),
+            AchievementFilter.Rarest => query.OrderBy(a => a.Achievement.GlobalPercent ?? 100),
+            AchievementFilter.Easiest => query.OrderByDescending(a => a.Achievement.GlobalPercent ?? 0),
+            _ => query
+        };
+
+        Achievements.Clear();
+        foreach (var item in query)
+            Achievements.Add(item);
     }
 
     [RelayCommand]

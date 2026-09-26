@@ -11,6 +11,7 @@
     <DockPanel Margin="16">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
             <Button DockPanel.Dock="Right" Content="Settings" Command="{Binding OpenSettingsCommand}" />
+            <Button DockPanel.Dock="Right" Content="Currently Hunting" Command="{Binding OpenHuntingCommand}" Margin="0,0,8,0" />
             <Button DockPanel.Dock="Right" Content="Refresh" Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsLoading}" Margin="0,0,8,0" />
             <TextBlock Text="Your Library" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
         </DockPanel>
@@ -21,6 +22,9 @@
 
         <TextBlock DockPanel.Dock="Top" Text="Loading..." IsVisible="{Binding IsLoading}" Margin="0,0,0,12" />
 
+        <TextBox DockPanel.Dock="Top" Text="{Binding SearchText}" PlaceholderText="Search your library..."
+                 Margin="0,0,0,12" />
+
         <ListBox ItemsSource="{Binding Games}">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:GameListItem">
@@ -30,7 +34,11 @@
                             Background="Transparent" BorderThickness="0" Padding="4">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Image Source="{Binding Icon}" Width="32" Height="32" />
-                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Width="280" />
+                            <ProgressBar Minimum="0" Maximum="1" Value="{Binding CompletionFraction}"
+                                         IsVisible="{Binding HasCompletion}" Width="120" Height="6" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding CompletionText}" IsVisible="{Binding HasCompletion}"
+                                       FontSize="11" Opacity="0.7" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </DataTemplate>

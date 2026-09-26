@@ -43,6 +43,22 @@ public class DatabaseService
                 GlobalPercent REAL NULL,
                 PRIMARY KEY (AppId, ApiName)
             );
+
+            CREATE TABLE IF NOT EXISTS AchievementNotes (
+                AppId INTEGER NOT NULL,
+                ApiName TEXT NOT NULL,
+                Note TEXT NOT NULL DEFAULT '',
+                Pinned INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (AppId, ApiName)
+            );
+
+            CREATE TABLE IF NOT EXISTS ChecklistItems (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                AppId INTEGER NOT NULL,
+                ApiName TEXT NOT NULL,
+                Text TEXT NOT NULL,
+                Checked INTEGER NOT NULL DEFAULT 0
+            );
             """);
     }
 
@@ -51,6 +67,23 @@ public class DatabaseService
         var connection = new SqliteConnection(_connectionString);
         connection.Open();
         return connection;
+    }
+
+    // AppId -> (unlocked, total), for games whose achievements have been fetched at least once.
+    public Dictionary<int, (int Unlocked, int Total)> GetCompletionSummaries()
+    {
+        using var connection = OpenConnection();
+        var rows = connection.Query<CompletionRow>(
+            "SELECT AppId, SUM(Unlocked) AS Unlocked, COUNT(*) AS Total FROM Achievements GROUP BY AppId");
+
+        return rows.ToDictionary(r => r.AppId, r => (r.Unlocked, r.Total));
+    }
+
+    private class CompletionRow
+    {
+        public int AppId { get; set; }
+        public int Unlocked { get; set; }
+        public int Total { get; set; }
     }
 
     public List<Game> GetGames()
@@ -112,6 +145,80 @@ public class DatabaseService
             transaction);
 
         transaction.Commit();
+    }
+
+    public AchievementNote GetNote(int appId, string apiName)
+    {
+        using var connection = OpenConnection();
+        return connection.QuerySingleOrDefault<AchievementNote>(
+            "SELECT AppId, ApiName, Note, Pinned FROM AchievementNotes WHERE AppId = @appId AND ApiName = @apiName",
+            new { appId, apiName })
+            ?? new AchievementNote { AppId = appId, ApiName = apiName };
+    }
+
+    public void SaveNote(AchievementNote note)
+    {
+        using var connection = OpenConnection();
+        connection.Execute(
+            "INSERT OR REPLACE INTO AchievementNotes (AppId, ApiName, Note, Pinned) VALUES (@AppId, @ApiName, @Note, @Pinned)",
+            note);
+    }
+
+    public List<(Game Game, Achievement Achievement)> GetPinnedAchievements()
+    {
+        using var connection = OpenConnection();
+        var pins = connection.Query<PinKey>(
+            "SELECT AppId, ApiName FROM AchievementNotes WHERE Pinned = 1").ToList();
+
+        var result = new List<(Game, Achievement)>();
+        foreach (var pin in pins)
+        {
+            var game = connection.QuerySingleOrDefault<Game>(
+                "SELECT AppId, Name, IconUrl FROM Games WHERE AppId = @AppId", pin);
+            var row = connection.QuerySingleOrDefault<AchievementRow>(
+                "SELECT * FROM Achievements WHERE AppId = @AppId AND ApiName = @ApiName", pin);
+
+            if (game is not null && row is not null)
+                result.Add((game, ToAchievement(row)));
+        }
+
+        return result;
+    }
+
+    public List<ChecklistItem> GetChecklistItems(int appId, string apiName)
+    {
+        using var connection = OpenConnection();
+        return connection.Query<ChecklistItem>(
+            "SELECT Id, AppId, ApiName, Text, Checked FROM ChecklistItems WHERE AppId = @appId AND ApiName = @apiName ORDER BY Id",
+            new { appId, apiName }).ToList();
+    }
+
+    public ChecklistItem AddChecklistItem(int appId, string apiName, string text)
+    {
+        using var connection = OpenConnection();
+        var id = connection.ExecuteScalar<long>(
+            "INSERT INTO ChecklistItems (AppId, ApiName, Text, Checked) VALUES (@appId, @apiName, @text, 0) RETURNING Id",
+            new { appId, apiName, text });
+
+        return new ChecklistItem { Id = (int)id, AppId = appId, ApiName = apiName, Text = text, Checked = false };
+    }
+
+    public void SetChecklistItemChecked(int id, bool isChecked)
+    {
+        using var connection = OpenConnection();
+        connection.Execute("UPDATE ChecklistItems SET Checked = @isChecked WHERE Id = @id", new { id, isChecked });
+    }
+
+    public void DeleteChecklistItem(int id)
+    {
+        using var connection = OpenConnection();
+        connection.Execute("DELETE FROM ChecklistItems WHERE Id = @id", new { id });
+    }
+
+    private class PinKey
+    {
+        public int AppId { get; set; }
+        public string ApiName { get; set; } = string.Empty;
     }
 
     private static Achievement ToAchievement(AchievementRow row) => new()

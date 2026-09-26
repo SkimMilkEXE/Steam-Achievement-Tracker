@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:AchievementTracker.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+             x:Class="AchievementTracker.Views.HuntingView"
+             x:DataType="vm:HuntingViewModel">
+
+    <DockPanel Margin="16">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <Button DockPanel.Dock="Left" Content="&lt; Back" Command="{Binding BackCommand}" />
+            <TextBlock Text="Currently Hunting" FontSize="20" FontWeight="Bold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </DockPanel>
+
+        <TextBlock DockPanel.Dock="Top" Text="Pin achievements from a game's detail screen to track them here."
+                   IsVisible="{Binding IsEmpty}" Opacity="0.6" Margin="0,0,0,12" />
+
+        <ListBox ItemsSource="{Binding Items}">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:HuntingItem">
+                    <Button Command="{Binding $parent[UserControl].((vm:HuntingViewModel)DataContext).OpenGameCommand}"
+                            CommandParameter="{Binding}"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent" BorderThickness="0" Padding="4">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Image Source="{Binding Icon}" Width="40" Height="40" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" />
+                                <TextBlock Text="{Binding GameName}" FontSize="12" Opacity="0.7" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Button>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+
+</UserControl>
