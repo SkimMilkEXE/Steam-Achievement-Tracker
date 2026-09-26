@@ -32,8 +32,8 @@
             <TextBlock Text="Track your Steam achievement hunting, leave notes on the tricky ones, build sub-checklists, and pin what you're currently chasing. Best part: it's all in one place."
                        TextWrapping="Wrap" TextAlignment="Center" Opacity="0.75" Margin="0,0,0,12" />
 
-            <TextBlock Text="Steam ID64 or Vanity Name" />
-            <TextBox Text="{Binding SteamIdOrVanity}" PlaceholderText="e.g. 76561198133853743 or your profile URL" />
+            <TextBlock Text="Steam ID or Profile URL" />
+            <TextBox Text="{Binding SteamIdOrVanity}" PlaceholderText="e.g. 76561198000000000 or your profile URL" />
 
             <Button Content="Get Started" Command="{Binding GetStartedCommand}"
                     HorizontalAlignment="Center" Margin="0,8,0,0" />
