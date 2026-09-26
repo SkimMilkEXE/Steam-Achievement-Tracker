@@ -27,8 +27,8 @@ public partial class HuntingViewModel : ViewModelBase
     {
         _databaseService = databaseService;
 
-        foreach (var (game, achievement) in _databaseService.GetPinnedAchievements())
-            Items.Add(new HuntingItem(game, achievement));
+        foreach (var (game, achievement, note) in _databaseService.GetPinnedAchievements())
+            Items.Add(new HuntingItem(game, achievement, note));
 
         IsEmpty = Items.Count == 0;
 

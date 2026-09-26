@@ -11,13 +11,16 @@ public partial class HuntingItem : ObservableObject
     public string GameName => Game.Name;
     public string DisplayName => Achievement.DisplayName;
     public string IconUrl => Achievement.Unlocked ? Achievement.IconUrl : Achievement.IconGrayUrl;
+    public string Note { get; }
+    public bool HasNote => !string.IsNullOrWhiteSpace(Note);
 
     [ObservableProperty]
     public partial Bitmap? Icon { get; set; }
 
-    public HuntingItem(Game game, Achievement achievement)
+    public HuntingItem(Game game, Achievement achievement, string note)
     {
         Game = game;
         Achievement = achievement;
+        Note = note;
     }
 }

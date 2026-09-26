@@ -175,13 +175,13 @@ public class DatabaseService
             note);
     }
 
-    public List<(Game Game, Achievement Achievement)> GetPinnedAchievements()
+    public List<(Game Game, Achievement Achievement, string Note)> GetPinnedAchievements()
     {
         using var connection = OpenConnection();
         var pins = connection.Query<PinKey>(
-            "SELECT AppId, ApiName FROM AchievementNotes WHERE Pinned = 1").ToList();
+            "SELECT AppId, ApiName, Note FROM AchievementNotes WHERE Pinned = 1").ToList();
 
-        var result = new List<(Game, Achievement)>();
+        var result = new List<(Game, Achievement, string)>();
         foreach (var pin in pins)
         {
             var game = connection.QuerySingleOrDefault<Game>(
@@ -190,7 +190,7 @@ public class DatabaseService
                 "SELECT * FROM Achievements WHERE AppId = @AppId AND ApiName = @ApiName", pin);
 
             if (game is not null && row is not null)
-                result.Add((game, ToAchievement(row)));
+                result.Add((game, ToAchievement(row), pin.Note));
         }
 
         return result;
@@ -230,6 +230,7 @@ public class DatabaseService
     {
         public int AppId { get; set; }
         public string ApiName { get; set; } = string.Empty;
+        public string Note { get; set; } = string.Empty;
     }
 
     private static Achievement ToAchievement(AchievementRow row) => new()

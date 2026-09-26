@@ -52,8 +52,8 @@ public partial class AchievementListItem : ObservableObject
     }
 
     partial void OnPinnedChanged(bool value) => SaveNote();
+    partial void OnNoteChanged(string value) => SaveNote();
 
-    [RelayCommand]
     private void SaveNote()
     {
         _databaseService.SaveNote(new AchievementNote

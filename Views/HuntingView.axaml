@@ -29,6 +29,8 @@
                             <StackPanel>
                                 <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" />
                                 <TextBlock Text="{Binding GameName}" FontSize="12" Opacity="0.7" />
+                                <TextBlock Text="{Binding Note}" IsVisible="{Binding HasNote}"
+                                           FontSize="12" Opacity="0.7" FontStyle="Italic" TextWrapping="Wrap" Margin="0,4,0,0" />
                             </StackPanel>
                         </StackPanel>
                     </Button>
