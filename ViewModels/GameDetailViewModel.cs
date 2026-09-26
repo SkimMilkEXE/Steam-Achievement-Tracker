@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -37,6 +38,9 @@ public partial class GameDetailViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial double CompletionFraction { get; set; }
+
+    [ObservableProperty]
+    public partial IImage? TrophyIcon { get; set; }
 
     public AchievementFilter[] FilterOptions { get; } = Enum.GetValues<AchievementFilter>();
 
@@ -113,6 +117,7 @@ public partial class GameDetailViewModel : ViewModelBase
         var unlocked = _allAchievements.Count(a => a.Unlocked);
         CompletionFraction = total > 0 ? (double)unlocked / total : 0;
         CompletionText = total > 0 ? $"{unlocked}/{total} ({CompletionFraction:P0})" : string.Empty;
+        TrophyIcon = total > 0 ? TrophyIcons.ForFraction(CompletionFraction) : null;
 
         ApplyView();
     }
