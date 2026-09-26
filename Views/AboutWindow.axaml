@@ -11,7 +11,7 @@
         Width="380" Height="340"
         WindowStartupLocation="CenterOwner"
         CanResize="False"
-        Title="About Steam Achievement Tracker">
+        Title="About Steam Hunter">
 
     <StackPanel Margin="28" Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Border Width="76" Height="76" CornerRadius="38" ClipToBounds="True"
@@ -23,7 +23,7 @@
                    RenderOptions.BitmapInterpolationMode="HighQuality" />
         </Border>
 
-        <TextBlock Text="Steam Achievement Tracker" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+        <TextBlock Text="Steam Hunter" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
         <TextBlock Text="{Binding Version}" Opacity="0.7" HorizontalAlignment="Center" Margin="0,-8,0,0" />
         <TextBlock Text="Track Steam achievement hunting, notes, and checklists."
                    TextWrapping="Wrap" TextAlignment="Center" Opacity="0.7" />

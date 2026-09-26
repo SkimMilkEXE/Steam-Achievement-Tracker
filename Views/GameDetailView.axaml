@@ -36,9 +36,19 @@
         </DockPanel>
 
         <ListBox ItemsSource="{Binding Achievements}">
+            <ListBox.Styles>
+                <Style Selector="Border.achievementRow">
+                    <Setter Property="Background" Value="{DynamicResource AchievementLockedBrush}" />
+                </Style>
+                <Style Selector="Border.achievementRow.unlocked">
+                    <Setter Property="Background" Value="{DynamicResource AchievementUnlockedBrush}" />
+                </Style>
+            </ListBox.Styles>
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:AchievementListItem">
                     <StackPanel>
+                        <Border Classes="achievementRow" Classes.unlocked="{Binding Unlocked}"
+                                CornerRadius="6" Padding="8,0">
                         <StackPanel Spacing="6" Margin="0,8">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Image Source="{Binding Icon}" Width="40" Height="40" />
@@ -74,6 +84,7 @@
                                 <Button Content="Add" Command="{Binding AddChecklistItemCommand}" />
                             </StackPanel>
                         </StackPanel>
+                        </Border>
                         <Border Height="1" Background="{DynamicResource AppBorderBrush}" Margin="52,0,8,0" />
                     </StackPanel>
                 </DataTemplate>

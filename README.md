@@ -1,4 +1,4 @@
-# Steam Achievement Tracker
+# Steam Hunter
 
 A desktop app for tracking Steam achievement hunting: browse your library, dig into each game's achievements, jot notes and build sub-checklists for the tricky ones, and pin what you're currently chasing to a dedicated list.
 
@@ -29,7 +29,7 @@ Built by [SkimMilk.EXE](https://skimmilkexe.dev).
 ## Getting Started
 
 1. Download the latest release from the [Releases page](https://github.com/SkimMilkEXE/Steam-Achievement-Tracker/releases).
-2. Run `SteamAchievementTracker.exe` — no installation needed.
+2. Run `SteamHunter.exe` — no installation needed.
 3. Enter your Steam ID64 or full profile URL on the welcome screen.
 
 Your Steam profile and game details need to be public for the app to read your library and achievements.

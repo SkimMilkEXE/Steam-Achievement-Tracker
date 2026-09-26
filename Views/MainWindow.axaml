@@ -9,7 +9,7 @@
         x:DataType="vm:MainViewModel"
         Icon="/Assets/logo.ico"
         Background="{DynamicResource AppBackgroundBrush}"
-        Title="Steam Achievement Tracker">
+        Title="Steam Hunter">
 
     <Panel>
         <controls:ParticleBackground />

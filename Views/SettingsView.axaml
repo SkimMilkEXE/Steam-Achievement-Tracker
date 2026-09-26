@@ -16,7 +16,7 @@
                 Margin="16,16,0,0" HorizontalAlignment="Left" />
 
         <StackPanel Margin="24" Spacing="12" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Text="Steam Achievement Tracker Setup" FontSize="20" FontWeight="Bold" />
+            <TextBlock Text="Steam Hunter Setup" FontSize="20" FontWeight="Bold" />
 
         <TextBlock Text="Steam ID or Profile URL" />
         <TextBox Text="{Binding SteamIdOrVanity}" PlaceholderText="e.g. 76561198000000000 or your profile URL" />

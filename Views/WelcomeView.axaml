@@ -26,7 +26,7 @@
             <TextBlock FontSize="26" FontWeight="Bold" TextAlignment="Center" TextWrapping="Wrap"
                        Margin="0,4,0,0">
                 <Run Text="Welcome to" />
-                <Run Text=" Steam Achievement Tracker" Foreground="{DynamicResource AppAccentBrush}" />
+                <Run Text=" Steam Hunter" Foreground="{DynamicResource AppAccentBrush}" />
             </TextBlock>
 
             <TextBlock Text="Track your Steam achievement hunting, leave notes on the tricky ones, build sub-checklists, and pin what you're currently chasing. Best part: it's all in one place."
