@@ -14,19 +14,13 @@ public class WorkerSteamDataProvider : ISteamDataProvider
 {
     private static readonly HttpClient Client = new() { BaseAddress = new Uri("https://steam-tracker-api.richardhurley374.workers.dev/") };
 
-    public async Task<string> ResolveSteamIdAsync(string steamIdOrVanity)
+    // Vanity name resolution proved unreliable, so the app requires the plain numeric SteamID64.
+    public Task<string> ResolveSteamIdAsync(string steamId)
     {
-        if (steamIdOrVanity.Length == 17 && steamIdOrVanity.All(char.IsDigit))
-            return steamIdOrVanity;
+        if (steamId.Length == 17 && steamId.All(char.IsDigit))
+            return Task.FromResult(steamId);
 
-        var url = $"resolve?vanityurl={Uri.EscapeDataString(steamIdOrVanity)}";
-        var result = await Client.GetFromJsonAsync<ResolveVanityResponse>(url)
-            ?? throw new InvalidOperationException("No response resolving your Steam ID.");
-
-        if (result.Response.Success != 1 || result.Response.SteamId is null)
-            throw new InvalidOperationException("Couldn't find that Steam profile. Check the ID or vanity name.");
-
-        return result.Response.SteamId;
+        throw new InvalidOperationException("Enter your 17-digit SteamID64.");
     }
 
     public async Task<List<Game>> GetOwnedGamesAsync(string steamId)

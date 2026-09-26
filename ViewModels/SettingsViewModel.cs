@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
@@ -76,7 +77,14 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void Save()
     {
-        SteamIdOrVanity = NormalizeSteamIdOrVanity(SteamIdOrVanity);
+        var value = ExtractSteamId(SteamIdOrVanity);
+        if (value.Length != 17 || !value.All(char.IsDigit))
+        {
+            StatusMessage = "Enter your 17-digit SteamID64 or a full profile URL.";
+            return;
+        }
+
+        SteamIdOrVanity = value;
         _settingsService.Save(new AppSettings
         {
             SteamIdOrVanity = SteamIdOrVanity,
@@ -90,12 +98,12 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void Back() => BackRequested?.Invoke(this, EventArgs.Empty);
 
-    // Lets people paste a full profile URL (steamcommunity.com/id/NAME or /profiles/ID)
-    // instead of having to extract the name/ID themselves.
-    internal static string NormalizeSteamIdOrVanity(string input)
+    // Lets people paste a full profile URL (steamcommunity.com/profiles/ID) instead of having
+    // to extract the numeric ID themselves.
+    internal static string ExtractSteamId(string input)
     {
         var trimmed = input.Trim();
-        var match = Regex.Match(trimmed, @"steamcommunity\.com/(?:id|profiles)/([^/\s]+)", RegexOptions.IgnoreCase);
+        var match = Regex.Match(trimmed, @"steamcommunity\.com/profiles/(\d+)", RegexOptions.IgnoreCase);
         return match.Success ? match.Groups[1].Value : trimmed;
     }
 }

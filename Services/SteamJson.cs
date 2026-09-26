@@ -5,21 +5,6 @@ namespace AchievementTracker.Services;
 
 // Shapes matching what the Cloudflare Worker returns, which proxies Steam's own JSON through unchanged.
 
-internal class ResolveVanityResponse
-{
-    [JsonPropertyName("response")]
-    public ResolveVanityInner Response { get; set; } = new();
-}
-
-internal class ResolveVanityInner
-{
-    [JsonPropertyName("success")]
-    public int Success { get; set; }
-
-    [JsonPropertyName("steamid")]
-    public string? SteamId { get; set; }
-}
-
 internal class OwnedGamesResponse
 {
     [JsonPropertyName("response")]

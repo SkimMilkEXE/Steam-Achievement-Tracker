@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AchievementTracker.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -32,15 +33,15 @@ public partial class WelcomeViewModel : ViewModelBase
     [RelayCommand]
     private void GetStarted()
     {
-        var normalized = SettingsViewModel.NormalizeSteamIdOrVanity(SteamIdOrVanity);
-        if (string.IsNullOrWhiteSpace(normalized))
+        var value = SettingsViewModel.ExtractSteamId(SteamIdOrVanity);
+        if (value.Length != 17 || !value.All(char.IsDigit))
         {
-            StatusMessage = "Enter your Steam ID or profile URL to continue.";
+            StatusMessage = "Enter your 17-digit SteamID64 or a full profile URL.";
             return;
         }
 
         var settings = _settingsService.Load();
-        settings.SteamIdOrVanity = normalized;
+        settings.SteamIdOrVanity = value;
         _settingsService.Save(settings);
         Saved?.Invoke(this, EventArgs.Empty);
     }
