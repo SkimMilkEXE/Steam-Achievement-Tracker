@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="AchievementTracker.Views.AboutWindow"
+        x:DataType="local:AboutWindow"
+        xmlns:local="using:AchievementTracker.Views"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Width="360" Height="260"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Title="About Achievement Tracker">
+
+    <StackPanel Margin="24" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Image Source="/Assets/logo.png" Width="64" Height="64" HorizontalAlignment="Center" Margin="0,0,0,8" />
+
+        <TextBlock Text="Achievement Tracker" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding Version}" Opacity="0.7" HorizontalAlignment="Center" />
+        <TextBlock Text="Track Steam achievement hunting, notes, and checklists."
+                   TextWrapping="Wrap" TextAlignment="Center" Opacity="0.7" Margin="0,4,0,0" />
+        <TextBlock Text="Built by SkimMilk.EXE" FontSize="11" Opacity="0.5" HorizontalAlignment="Center" Margin="0,8,0,0" />
+
+        <Button Content="Close" Click="OnCloseClick" HorizontalAlignment="Center" Margin="0,4,0,0" />
+    </StackPanel>
+
+</Window>

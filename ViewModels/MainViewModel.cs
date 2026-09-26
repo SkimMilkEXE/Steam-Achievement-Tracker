@@ -1,6 +1,10 @@
 using AchievementTracker.Models;
 using AchievementTracker.Services;
+using AchievementTracker.Views;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace AchievementTracker.ViewModels;
 
@@ -57,5 +61,31 @@ public partial class MainViewModel : ViewModelBase
         vm.BackRequested += (_, _) => CurrentPage = GetLibraryPage();
         vm.OpenGameRequested += (_, game) => CurrentPage = CreateGameDetailPage(game);
         return vm;
+    }
+
+    [RelayCommand]
+    private void NavigateLibrary() => CurrentPage = GetLibraryPage();
+
+    [RelayCommand]
+    private void NavigateSettings() => CurrentPage = CreateSettingsPage();
+
+    [RelayCommand]
+    private void NavigateHunting() => CurrentPage = CreateHuntingPage();
+
+    [RelayCommand]
+    private void ShowAbout()
+    {
+        var about = new AboutWindow();
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: { } main })
+            about.ShowDialog(main);
+        else
+            about.Show();
+    }
+
+    [RelayCommand]
+    private void Exit()
+    {
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+            lifetime.Shutdown();
     }
 }

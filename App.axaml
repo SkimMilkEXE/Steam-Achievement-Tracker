@@ -9,7 +9,28 @@
         <local:ViewLocator />
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <!-- Matches the neon-blue-on-navy palette from skimmilkexe.dev (bg-void/bg-panel/neon-blue variables). -->
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="AppBackgroundBrush">#05070D</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppBorderBrush">#596D8FB0</SolidColorBrush>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="AppBackgroundBrush">#F5F8FC</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppBorderBrush">#598FC0F5</SolidColorBrush>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light" Accent="#4F8FD1" RegionColor="#EEF2F7" />
+                <ColorPaletteResources x:Key="Dark" Accent="#8FC0F5" RegionColor="#0B1220" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
     </Application.Styles>
 </Application>

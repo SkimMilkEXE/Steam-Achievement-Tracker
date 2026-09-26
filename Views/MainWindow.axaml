@@ -6,9 +6,29 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="AchievementTracker.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="AchievementTracker">
+        Icon="/Assets/logo.ico"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Title="Achievement Tracker">
 
-    <ContentControl Content="{Binding CurrentPage}" />
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Library" Command="{Binding NavigateLibraryCommand}" />
+                <MenuItem Header="_Currently Hunting" Command="{Binding NavigateHuntingCommand}" />
+                <MenuItem Header="_Settings" Command="{Binding NavigateSettingsCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Command="{Binding ShowAboutCommand}" />
+            </MenuItem>
+        </Menu>
+
+        <TextBlock DockPanel.Dock="Bottom" Text="Built by SkimMilk.EXE" FontSize="11" Opacity="0.5"
+                   HorizontalAlignment="Center" Margin="0,4,0,6" />
+
+        <ContentControl Content="{Binding CurrentPage}" />
+    </DockPanel>
 
 </Window>
