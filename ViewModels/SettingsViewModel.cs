@@ -14,6 +14,7 @@ public partial class SettingsViewModel : ViewModelBase
     private readonly SettingsService _settingsService;
 
     public event EventHandler? Saved;
+    public event EventHandler? BackRequested;
 
     [ObservableProperty]
     public partial string SteamIdOrVanity { get; set; } = string.Empty;
@@ -86,9 +87,12 @@ public partial class SettingsViewModel : ViewModelBase
         Saved?.Invoke(this, EventArgs.Empty);
     }
 
+    [RelayCommand]
+    private void Back() => BackRequested?.Invoke(this, EventArgs.Empty);
+
     // Lets people paste a full profile URL (steamcommunity.com/id/NAME or /profiles/ID)
     // instead of having to extract the name/ID themselves.
-    private static string NormalizeSteamIdOrVanity(string input)
+    internal static string NormalizeSteamIdOrVanity(string input)
     {
         var trimmed = input.Trim();
         var match = Regex.Match(trimmed, @"steamcommunity\.com/(?:id|profiles)/([^/\s]+)", RegexOptions.IgnoreCase);

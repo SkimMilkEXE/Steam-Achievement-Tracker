@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:AchievementTracker.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="600"
+             x:Class="AchievementTracker.Views.WelcomeView"
+             x:DataType="vm:WelcomeViewModel">
+
+    <Design.DataContext>
+        <vm:WelcomeViewModel />
+    </Design.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Margin="40" Spacing="10" MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+            <Border Width="108" Height="108" CornerRadius="54" ClipToBounds="True"
+                    BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="2"
+                    HorizontalAlignment="Center" Margin="0,0,0,12"
+                    BoxShadow="0 0 24 2 #408FC0F5">
+                <Image Source="/Assets/SkimProfile.png" Stretch="UniformToFill"
+                       Width="190" Height="190"
+                       RenderOptions.BitmapInterpolationMode="HighQuality" />
+            </Border>
+
+            <TextBlock FontSize="26" FontWeight="Bold" TextAlignment="Center" TextWrapping="Wrap"
+                       Margin="0,4,0,0">
+                <Run Text="Welcome to" />
+                <Run Text=" Achievement Tracker" Foreground="{DynamicResource AppAccentBrush}" />
+            </TextBlock>
+
+            <TextBlock Text="Track your Steam achievement hunting, leave notes on the tricky ones, build sub-checklists, and pin what you're currently chasing. Best part: it's all in one place."
+                       TextWrapping="Wrap" TextAlignment="Center" Opacity="0.75" Margin="0,0,0,12" />
+
+            <TextBlock Text="Steam ID64 or Vanity Name" />
+            <TextBox Text="{Binding SteamIdOrVanity}" PlaceholderText="e.g. 76561198133853743 or your profile URL" />
+
+            <Button Content="Get Started" Command="{Binding GetStartedCommand}"
+                    HorizontalAlignment="Center" Margin="0,8,0,0" />
+            <TextBlock Text="{Binding StatusMessage}" Foreground="IndianRed"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

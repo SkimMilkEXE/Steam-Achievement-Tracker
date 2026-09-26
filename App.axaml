@@ -16,10 +16,12 @@
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="AppBackgroundBrush">#05070D</SolidColorBrush>
                     <SolidColorBrush x:Key="AppBorderBrush">#596D8FB0</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppAccentBrush">#8FC0F5</SolidColorBrush>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Light">
                     <SolidColorBrush x:Key="AppBackgroundBrush">#F5F8FC</SolidColorBrush>
                     <SolidColorBrush x:Key="AppBorderBrush">#598FC0F5</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppAccentBrush">#4F8FD1</SolidColorBrush>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>

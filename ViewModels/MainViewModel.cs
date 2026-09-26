@@ -18,10 +18,14 @@ public partial class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
-        var settings = _settingsService.Load();
+        CurrentPage = CreateWelcomePage();
+    }
 
-        // v2 (the Worker) needs no API key - only a Steam ID/vanity name to get started.
-        CurrentPage = string.IsNullOrWhiteSpace(settings.SteamIdOrVanity) ? CreateSettingsPage() : GetLibraryPage();
+    private WelcomeViewModel CreateWelcomePage()
+    {
+        var vm = new WelcomeViewModel(_settingsService);
+        vm.Saved += (_, _) => CurrentPage = GetLibraryPage();
+        return vm;
     }
 
     private SettingsViewModel CreateSettingsPage()
@@ -32,6 +36,7 @@ public partial class MainViewModel : ViewModelBase
             _libraryPage = null;
             CurrentPage = GetLibraryPage();
         };
+        vm.BackRequested += (_, _) => CurrentPage = GetLibraryPage();
         return vm;
     }
 
