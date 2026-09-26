@@ -29,7 +29,7 @@ Built by [SkimMilk.EXE](https://skimmilkexe.dev).
 ## Getting Started
 
 1. Download the latest release from the [Releases page](https://github.com/SkimMilkEXE/Steam-Achievement-Tracker/releases).
-2. Run `AchievementTracker.exe` — no installation needed.
+2. Run `SteamAchievementTracker.exe` — no installation needed.
 3. Enter your Steam ID64 or full profile URL on the welcome screen.
 
 Your Steam profile and game details need to be public for the app to read your library and achievements.

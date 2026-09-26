@@ -41,9 +41,13 @@ public static class TrophyIcons
     // actual badge art, so scaling them into the same box makes them look inconsistently sized.
     // Trimming to the opaque bounding box before display normalizes that regardless of how
     // future replacement assets are exported.
+    // Uses the executing assembly's own name rather than a hardcoded string, so this doesn't
+    // silently break if the assembly is ever renamed (as happened when AssemblyName changed).
+    private static readonly string AssemblyName = typeof(TrophyIcons).Assembly.GetName().Name!;
+
     private static IImage Load(string name)
     {
-        using var stream = AssetLoader.Open(new Uri($"avares://AchievementTracker/Assets/{name}.png"));
+        using var stream = AssetLoader.Open(new Uri($"avares://{AssemblyName}/Assets/{name}.png"));
         var bitmap = new Bitmap(stream);
         return Trim(bitmap);
     }
