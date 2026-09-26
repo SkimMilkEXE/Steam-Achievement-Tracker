@@ -11,6 +11,7 @@ namespace AchievementTracker.ViewModels;
 public partial class LibraryViewModel : ViewModelBase
 {
     private readonly ISteamDataProvider _steamDataProvider;
+    private readonly DatabaseService _databaseService;
     private readonly AppSettings _settings;
 
     [ObservableProperty]
@@ -24,29 +25,44 @@ public partial class LibraryViewModel : ViewModelBase
     public event EventHandler? OpenSettingsRequested;
     public event EventHandler<Game>? OpenGameRequested;
 
-    public LibraryViewModel(AppSettings settings) : this(settings, new WorkerSteamDataProvider())
+    public LibraryViewModel(AppSettings settings) : this(settings, new WorkerSteamDataProvider(), new DatabaseService())
     {
     }
 
-    public LibraryViewModel(AppSettings settings, ISteamDataProvider steamDataProvider)
+    public LibraryViewModel(AppSettings settings, ISteamDataProvider steamDataProvider, DatabaseService databaseService)
     {
         _settings = settings;
         _steamDataProvider = steamDataProvider;
-        _ = LoadAsync();
+        _databaseService = databaseService;
+
+        var cachedGames = _databaseService.GetGames();
+        if (cachedGames.Count > 0)
+        {
+            foreach (var game in cachedGames)
+                Games.Add(new GameListItem(game));
+
+            _ = IconLoader.LoadAllAsync(Games, g => g.Game.IconUrl, (g, bmp) => g.Icon = bmp);
+        }
+        else
+        {
+            _ = RefreshAsync();
+        }
     }
 
     [RelayCommand]
-    private async Task LoadAsync()
+    private async Task RefreshAsync()
     {
         IsLoading = true;
         ErrorMessage = string.Empty;
-        Games.Clear();
 
         try
         {
             var steamId = await _steamDataProvider.ResolveSteamIdAsync(_settings.SteamIdOrVanity, _settings.ApiKey);
             var games = await _steamDataProvider.GetOwnedGamesAsync(steamId, _settings.ApiKey);
 
+            _databaseService.SaveGames(games);
+
+            Games.Clear();
             foreach (var game in games)
                 Games.Add(new GameListItem(game));
 
@@ -54,7 +70,7 @@ public partial class LibraryViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Couldn't load your library: {ex.Message}";
+            ErrorMessage = $"Couldn't refresh your library: {ex.Message}";
         }
         finally
         {

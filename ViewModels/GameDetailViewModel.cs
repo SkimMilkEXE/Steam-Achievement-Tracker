@@ -13,6 +13,7 @@ public partial class GameDetailViewModel : ViewModelBase
     private readonly Game _game;
     private readonly AppSettings _settings;
     private readonly ISteamDataProvider _steamDataProvider;
+    private readonly DatabaseService _databaseService;
 
     public string GameName => _game.Name;
 
@@ -26,24 +27,37 @@ public partial class GameDetailViewModel : ViewModelBase
 
     public event EventHandler? BackRequested;
 
-    public GameDetailViewModel(Game game, AppSettings settings) : this(game, settings, new WorkerSteamDataProvider())
+    public GameDetailViewModel(Game game, AppSettings settings)
+        : this(game, settings, new WorkerSteamDataProvider(), new DatabaseService())
     {
     }
 
-    public GameDetailViewModel(Game game, AppSettings settings, ISteamDataProvider steamDataProvider)
+    public GameDetailViewModel(Game game, AppSettings settings, ISteamDataProvider steamDataProvider, DatabaseService databaseService)
     {
         _game = game;
         _settings = settings;
         _steamDataProvider = steamDataProvider;
-        _ = LoadAsync();
+        _databaseService = databaseService;
+
+        var cachedAchievements = _databaseService.GetAchievements(game.AppId);
+        if (cachedAchievements.Count > 0)
+        {
+            foreach (var achievement in cachedAchievements)
+                Achievements.Add(new AchievementListItem(achievement));
+
+            _ = IconLoader.LoadAllAsync(Achievements, a => a.IconUrl, (a, bmp) => a.Icon = bmp);
+        }
+        else
+        {
+            _ = RefreshAsync();
+        }
     }
 
     [RelayCommand]
-    private async Task LoadAsync()
+    private async Task RefreshAsync()
     {
         IsLoading = true;
         ErrorMessage = string.Empty;
-        Achievements.Clear();
 
         try
         {
@@ -56,6 +70,9 @@ public partial class GameDetailViewModel : ViewModelBase
                 return;
             }
 
+            _databaseService.SaveAchievements(_game.AppId, achievements);
+
+            Achievements.Clear();
             foreach (var achievement in achievements)
                 Achievements.Add(new AchievementListItem(achievement));
 
@@ -63,7 +80,7 @@ public partial class GameDetailViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Couldn't load achievements: {ex.Message}";
+            ErrorMessage = $"Couldn't refresh achievements: {ex.Message}";
         }
         finally
         {

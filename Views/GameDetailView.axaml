@@ -11,6 +11,7 @@
     <DockPanel Margin="16">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
             <Button DockPanel.Dock="Left" Content="&lt; Back" Command="{Binding BackCommand}" />
+            <Button DockPanel.Dock="Right" Content="Refresh" Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsLoading}" />
             <TextBlock Text="{Binding GameName}" FontSize="20" FontWeight="Bold"
                        HorizontalAlignment="Center" VerticalAlignment="Center" />
         </DockPanel>

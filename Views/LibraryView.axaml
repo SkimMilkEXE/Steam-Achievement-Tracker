@@ -11,6 +11,7 @@
     <DockPanel Margin="16">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
             <Button DockPanel.Dock="Right" Content="Settings" Command="{Binding OpenSettingsCommand}" />
+            <Button DockPanel.Dock="Right" Content="Refresh" Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsLoading}" Margin="0,0,8,0" />
             <TextBlock Text="Your Library" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
         </DockPanel>
 
