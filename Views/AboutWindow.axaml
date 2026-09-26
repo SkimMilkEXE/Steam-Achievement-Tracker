@@ -13,7 +13,9 @@
         Title="About Achievement Tracker">
 
     <StackPanel Margin="24" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Image Source="/Assets/logo.png" Width="64" Height="64" HorizontalAlignment="Center" Margin="0,0,0,8" />
+        <!-- Placeholder for a logo image - Image controls need a .png/.jpg, not the .ico used for the window icon. -->
+        <Border Width="64" Height="64" CornerRadius="12" BorderThickness="1"
+                BorderBrush="{DynamicResource AppBorderBrush}" HorizontalAlignment="Center" Margin="0,0,0,8" />
 
         <TextBlock Text="Achievement Tracker" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
         <TextBlock Text="{Binding Version}" Opacity="0.7" HorizontalAlignment="Center" />
