@@ -6,24 +6,30 @@
         x:Class="AchievementTracker.Views.AboutWindow"
         x:DataType="local:AboutWindow"
         xmlns:local="using:AchievementTracker.Views"
+        Icon="/Assets/logo.ico"
         Background="{DynamicResource AppBackgroundBrush}"
-        Width="360" Height="260"
+        Width="380" Height="340"
         WindowStartupLocation="CenterOwner"
         CanResize="False"
         Title="About Achievement Tracker">
 
-    <StackPanel Margin="24" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <!-- Placeholder for a logo image - Image controls need a .png/.jpg, not the .ico used for the window icon. -->
-        <Border Width="64" Height="64" CornerRadius="12" BorderThickness="1"
-                BorderBrush="{DynamicResource AppBorderBrush}" HorizontalAlignment="Center" Margin="0,0,0,8" />
+    <StackPanel Margin="28" Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border Width="76" Height="76" CornerRadius="38" ClipToBounds="True"
+                BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="2"
+                HorizontalAlignment="Center"
+                BoxShadow="0 0 20 2 #408FC0F5">
+            <Image Source="/Assets/SkimProfile.png" Stretch="UniformToFill"
+                   Width="140" Height="140"
+                   RenderOptions.BitmapInterpolationMode="HighQuality" />
+        </Border>
 
         <TextBlock Text="Achievement Tracker" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
-        <TextBlock Text="{Binding Version}" Opacity="0.7" HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding Version}" Opacity="0.7" HorizontalAlignment="Center" Margin="0,-8,0,0" />
         <TextBlock Text="Track Steam achievement hunting, notes, and checklists."
-                   TextWrapping="Wrap" TextAlignment="Center" Opacity="0.7" Margin="0,4,0,0" />
-        <TextBlock Text="Built by SkimMilk.EXE" FontSize="11" Opacity="0.5" HorizontalAlignment="Center" Margin="0,8,0,0" />
+                   TextWrapping="Wrap" TextAlignment="Center" Opacity="0.7" />
+        <TextBlock Text="Built by SkimMilk.EXE" FontSize="11" Opacity="0.5" HorizontalAlignment="Center" Margin="0,4,0,0" />
 
-        <Button Content="Close" Click="OnCloseClick" HorizontalAlignment="Center" Margin="0,4,0,0" />
+        <Button Content="Close" Click="OnCloseClick" HorizontalAlignment="Center" Margin="0,10,0,0" />
     </StackPanel>
 
 </Window>
