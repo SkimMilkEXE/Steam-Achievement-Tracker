@@ -3,10 +3,25 @@
   "name": "steam-tracker-api",
   "main": "src/index.ts",
   "compatibility_date": "2025-01-01",
+  "workers_dev": true,
   "kv_namespaces": [
     {
       "binding": "RATE_LIMIT",
       "id": "32188ebf23104e89ba4ed9a5b272767f"
     }
-  ]
+  ],
+  "routes": [
+    {
+      "pattern": "api.skimmilkexe.dev",
+      "zone_name": "skimmilkexe.dev",
+      "custom_domain": true
+    }
+  ],
+  "preview_urls": false,
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true
+    }
+  }
 }

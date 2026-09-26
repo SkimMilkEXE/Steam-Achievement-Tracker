@@ -95,6 +95,7 @@ export default {
 				upstream.searchParams.set('format', 'json');
 				upstream.searchParams.set('steamid', steamId);
 				upstream.searchParams.set('include_appinfo', '1');
+				upstream.searchParams.set('include_played_free_games', '1');
 				return proxySteam(upstream, 300, request);
 			}
 
