@@ -50,6 +50,14 @@ public class WorkerSteamDataProvider : ISteamDataProvider
         return achievements.ToDictionary(a => a.Name);
     }
 
+    public async Task<Dictionary<string, DateTimeOffset?>> GetUnlockStatusAsync(int appId, string steamId)
+    {
+        var unlocked = await GetPlayerAchievementsAsync(appId, steamId);
+        return unlocked.ToDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value.Achieved == 1 ? DateTimeOffset.FromUnixTimeSeconds(kvp.Value.UnlockTime) : (DateTimeOffset?)null);
+    }
+
     private async Task<Dictionary<string, PlayerAchievementDto>> GetPlayerAchievementsAsync(int appId, string steamId)
     {
         try

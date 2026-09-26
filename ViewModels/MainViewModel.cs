@@ -1,8 +1,10 @@
+using System;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
 using AchievementTracker.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -19,6 +21,16 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         CurrentPage = CreateWelcomePage();
+
+        // Single shared poll for whichever game detail page happens to be open, rather than one
+        // timer per page instance - avoids leaking timers as the user browses between games.
+        var unlockPollTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(90) };
+        unlockPollTimer.Tick += (_, _) =>
+        {
+            if (CurrentPage is GameDetailViewModel page)
+                _ = page.RefreshUnlocksAsync();
+        };
+        unlockPollTimer.Start();
     }
 
     private WelcomeViewModel CreateWelcomePage()

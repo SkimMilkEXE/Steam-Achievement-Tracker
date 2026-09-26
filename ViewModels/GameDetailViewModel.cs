@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using AchievementTracker.Models;
 using AchievementTracker.Services;
@@ -97,6 +99,10 @@ public partial class GameDetailViewModel : ViewModelBase
 
             await IconLoader.LoadAllAsync(_allAchievements, a => a.IconUrl, (a, bmp) => a.Icon = bmp);
         }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
+        {
+            ErrorMessage = "Steam requests are rate-limited right now - try again in a minute.";
+        }
         catch (Exception ex)
         {
             ErrorMessage = $"Couldn't refresh achievements: {ex.Message}";
@@ -110,36 +116,50 @@ public partial class GameDetailViewModel : ViewModelBase
     private void SetAchievements(IEnumerable<Achievement> achievements)
     {
         _allAchievements = achievements
-            .Select(a => new AchievementListItem(_game.AppId, MaskIfHidden(a), _databaseService))
+            .Select(a => new AchievementListItem(_game.AppId, a, _databaseService, _settings.RevealHiddenAchievements))
             .ToList();
 
+        RecomputeCompletion();
+        ApplyView();
+    }
+
+    private void RecomputeCompletion()
+    {
         var total = _allAchievements.Count;
         var unlocked = _allAchievements.Count(a => a.Unlocked);
         CompletionFraction = total > 0 ? (double)unlocked / total : 0;
         CompletionText = total > 0 ? $"{unlocked}/{total} ({CompletionFraction:P0})" : string.Empty;
         TrophyIcon = total > 0 ? TrophyIcons.ForFraction(CompletionFraction) : null;
-
-        ApplyView();
     }
 
-    // Steam marks some achievements "hidden" so their name/description stay spoilers until unlocked.
-    private Achievement MaskIfHidden(Achievement achievement)
+    // Lightweight periodic check (see MainViewModel) so newly-earned achievements show up without
+    // the user having to hit Refresh - just the unlock status, not a full schema/rarity re-fetch.
+    public async Task RefreshUnlocksAsync()
     {
-        if (!achievement.Hidden || achievement.Unlocked || _settings.RevealHiddenAchievements)
-            return achievement;
-
-        return new Achievement
+        try
         {
-            ApiName = achievement.ApiName,
-            DisplayName = "Hidden Achievement",
-            Description = "Unlock this achievement to reveal its details.",
-            IconUrl = achievement.IconUrl,
-            IconGrayUrl = achievement.IconGrayUrl,
-            Unlocked = achievement.Unlocked,
-            Hidden = achievement.Hidden,
-            UnlockedAt = achievement.UnlockedAt,
-            GlobalPercent = achievement.GlobalPercent
-        };
+            var steamId = await _steamDataProvider.ResolveSteamIdAsync(_settings.SteamIdOrVanity);
+            var unlocks = await _steamDataProvider.GetUnlockStatusAsync(_game.AppId, steamId);
+            if (unlocks.Count == 0)
+                return;
+
+            var newlyUnlocked = _allAchievements
+                .Where(a => unlocks.TryGetValue(a.Achievement.ApiName, out var at) && a.ApplyUnlock(at))
+                .ToList();
+
+            if (newlyUnlocked.Count == 0)
+                return;
+
+            _databaseService.SaveAchievements(_game.AppId, _allAchievements.Select(a => a.Achievement));
+            RecomputeCompletion();
+            ApplyView();
+            await IconLoader.LoadAllAsync(newlyUnlocked, a => a.IconUrl, (a, bmp) => a.Icon = bmp);
+        }
+        catch
+        {
+            // Best-effort background poll - stay silent (rate limit, offline, etc.); the next
+            // manual Refresh or poll tick will catch up.
+        }
     }
 
     private void ApplyView()

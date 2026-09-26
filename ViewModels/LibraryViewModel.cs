@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using AchievementTracker.Models;
@@ -15,6 +17,10 @@ public partial class LibraryViewModel : ViewModelBase
 {
     // Pace for the background completion warmup - well under the Worker's 60 req/min cap.
     private static readonly TimeSpan WarmupDelay = TimeSpan.FromSeconds(1.5);
+
+    // If the Worker's rate limit is hit anyway (e.g. a manual refresh competing with the
+    // warmup), back off for a while instead of continuing to hammer it.
+    private static readonly TimeSpan RateLimitBackoff = TimeSpan.FromSeconds(30);
 
     private readonly ISteamDataProvider _steamDataProvider;
     private readonly DatabaseService _databaseService;
@@ -85,6 +91,10 @@ public partial class LibraryViewModel : ViewModelBase
             await IconLoader.LoadAllAsync(_allGames, g => g.Game.IconUrl, (g, bmp) => g.Icon = bmp);
             StartCompletionWarmup();
         }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
+        {
+            ErrorMessage = "Steam requests are rate-limited right now - try again in a minute.";
+        }
         catch (Exception ex)
         {
             ErrorMessage = $"Couldn't refresh your library: {ex.Message}";
@@ -130,6 +140,12 @@ public partial class LibraryViewModel : ViewModelBase
             catch (OperationCanceledException)
             {
                 return;
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                // Someone else (a manual refresh, another instance) is using the same rate-limit
+                // budget - back off for a while rather than immediately trying the next game too.
+                await Task.Delay(RateLimitBackoff, token);
             }
             catch
             {
