@@ -1,10 +1,9 @@
 interface Env {
 	STEAM_API_KEY: string;
-	RATE_LIMIT: KVNamespace;
+	RATE_LIMITER: RateLimit;
 }
 
 const STEAM_BASE = 'https://api.steampowered.com';
-const RATE_LIMIT_PER_MINUTE = 60;
 
 function isNumeric(value: string): boolean {
 	return /^\d+$/.test(value);
@@ -19,18 +18,6 @@ function jsonError(message: string, status: number): Response {
 		status,
 		headers: { 'content-type': 'application/json' },
 	});
-}
-
-async function checkRateLimit(request: Request, env: Env): Promise<boolean> {
-	const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-	const key = `rl:${ip}`;
-	const current = await env.RATE_LIMIT.get(key);
-	const count = current ? parseInt(current, 10) : 0;
-
-	if (count >= RATE_LIMIT_PER_MINUTE) return false;
-
-	await env.RATE_LIMIT.put(key, String(count + 1), { expirationTtl: 60 });
-	return true;
 }
 
 // Fetches from Steam (adding the secret key), caching the response at the edge.
@@ -67,7 +54,10 @@ export default {
 			return jsonError('Only GET is supported.', 405);
 		}
 
-		if (!(await checkRateLimit(request, env))) {
+		// Built-in rate limiter (limit set in wrangler.jsonc) - uses no KV quota.
+		const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+		const { success } = await env.RATE_LIMITER.limit({ key: ip });
+		if (!success) {
 			return jsonError('Rate limit exceeded. Try again in a minute.', 429);
 		}
 
